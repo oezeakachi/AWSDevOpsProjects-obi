@@ -7,16 +7,14 @@ pipeline{
     }
     stages {
         stage('Checkout SCM') {
-            steps {
-                steps {
-                git credentialsId: 'github-pat', branch: 'main', url: 'https://github.com/oezeakachi/DevopsProject2-obi.git'
-            }
+            steps { // This is the ONLY 'steps' block for this stage
+                git credentialsId: 'github-pat', branch: 'main', url: 'https://github.com/oezeakachi/AWSDevOpsProjects-obi.git'
             }
         }
         stage('Initializing Terraform'){
             steps {
                 script {
-                    dir('tf-aws-eks'){
+                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform init'
                     }
                 }
@@ -25,7 +23,7 @@ pipeline{
         stage('Validating Terraform'){
             steps {
                 script {
-                    dir('tf-aws-eks'){
+                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform validate'
                     }
                 }
@@ -34,7 +32,7 @@ pipeline{
         stage('Terraform Plan'){
             steps {
                 script {
-                    dir('tf-aws-eks'){
+                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform plan -var-file=variables/prod.tfvars'
                     }
                     input(message: "Are you sure to proceed?", ok: "Proceed")
@@ -44,8 +42,8 @@ pipeline{
         stage('Creating/Destroying EKS Cluster'){
             steps {
                 script {
-                    dir('tf-aws-eks'){
-                        sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve' 
+                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
+                        sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve'
                     }
                 }
             }
