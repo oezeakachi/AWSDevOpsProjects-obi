@@ -85,6 +85,42 @@ module "sg" {
   }
 }
 
+
+## Output variables
+output "ssh_keypair" {
+  value = tls_private_key.key.private_key_pem
+  sensitive = true
+}
+
+
+output "key_name" {
+  value = aws_key_pair.key_pair.key_name
+  
+}
+
+## variable definition
+variable "key_name_definer" {
+  description = ""
+  default     = "LL-TEST"
+  type        = string
+}
+
+## Key Pair Creation#######################################
+resource "tls_private_key" "key" {
+  algorithm = "RSA"
+}
+
+resource "local_file" "private_key" {
+  filename          = "${var.key_name_definer}-key.pem"
+  sensitive_content = tls_private_key.key.private_key_pem
+  file_permission   = "0400"
+}
+
+resource "aws_key_pair" "key_pair" {
+  key_name   = "${var.key_name_definer}-key"
+  public_key = tls_private_key.key.public_key_openssh
+}
+
 # EC2
 module "ec2_instance" {
   source = "terraform-aws-modules/ec2-instance/aws"
@@ -92,8 +128,8 @@ module "ec2_instance" {
   name = var.jenkins_ec2_instance
 
   instance_type               = var.instance_type
-  ami                         = "ami-0e8a34246278c21e4"
-  key_name                    = "jenkins_server_keypair"
+  ami                         = "ami-0b3e7dd7b2a99b08d"
+  key_name                    = "${var.key_name_definer}-key"
   monitoring                  = true
   vpc_security_group_ids      = [module.sg.security_group_id]
   subnet_id                   = module.vpc.public_subnets[0]

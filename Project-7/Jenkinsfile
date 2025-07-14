@@ -3,14 +3,14 @@ pipeline{
     environment {
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        AWS_DEFAULT_REGION = "us-east-1"
+        AWS_DEFAULT_REGION = "eu-west-1"
     }
     stages {
         stage('Checkout SCM') {
             steps {
-                script {
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/vishal2505/terraform-eks-cicd.git']])
-                }
+                steps {
+                git credentialsId: 'github-pat', branch: 'main', url: 'https://github.com/oezeakachi/DevopsProject2-obi.git'
+            }
             }
         }
         stage('Initializing Terraform'){
@@ -35,7 +35,7 @@ pipeline{
             steps {
                 script {
                     dir('tf-aws-eks'){
-                        sh 'terraform plan -var-file=variables/dev.tfvars'
+                        sh 'terraform plan -var-file=variables/prod.tfvars'
                     }
                     input(message: "Are you sure to proceed?", ok: "Proceed")
                 }
@@ -45,7 +45,7 @@ pipeline{
             steps {
                 script {
                     dir('tf-aws-eks'){
-                        sh 'terraform $action -var-file=variables/dev.tfvars -auto-approve' 
+                        sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve' 
                     }
                 }
             }
