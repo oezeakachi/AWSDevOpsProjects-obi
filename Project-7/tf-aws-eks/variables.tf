@@ -32,3 +32,13 @@ variable "instance_type" {
   description = "Instance Type"
   type        = string
 }
+
+variable "aws_auth_users" {
+  description = "List of user maps to add to the aws-auth configmap"
+  type        = list(object({
+    userarn  = string
+    username = string
+    groups   = list(string)
+  }))
+  default     = [] # Set a default empty list if it's optional, or remove default if it's mandatory
+}
