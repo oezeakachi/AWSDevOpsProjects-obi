@@ -3,7 +3,7 @@
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.37.1"
-  map_users = var.aws_auth_users
+  #map_users = var.aws_auth_users
 
   cluster_name    = "my-eks-cluster"
   cluster_version = "1.29"

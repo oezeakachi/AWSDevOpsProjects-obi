@@ -15,7 +15,7 @@ pipeline{
             steps {
                 script {
                     dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform init'
+                        sh 'terraform init -reconfigure'
                     }
                 }
             }
@@ -32,7 +32,7 @@ pipeline{
         stage('Terraform Plan'){
             steps {
                 script {
-                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
+                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform plan -var-file=variables/prod.tfvars'
                     }
                     input(message: "Are you sure to proceed?", ok: "Proceed")
