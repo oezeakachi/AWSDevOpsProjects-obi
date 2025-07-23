@@ -14,7 +14,7 @@ pipeline{
         stage('Initializing Terraform'){
             steps {
                 script {
-                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
+                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform init -reconfigure'
                     }
                 }
@@ -23,7 +23,7 @@ pipeline{
         stage('Validating Terraform'){
             steps {
                 script {
-                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
+                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform validate'
                     }
                 }
@@ -42,7 +42,7 @@ pipeline{
         stage('Creating/Destroying EKS Cluster'){
             steps {
                 script {
-                    dir('tf-aws-eks'){ // Remember to change this to 'terraform_code' if that's where your files are
+                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
                         sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve'
                     }
                 }
