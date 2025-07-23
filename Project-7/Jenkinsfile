@@ -43,7 +43,7 @@ pipeline{
             steps {
                 script {
                     dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve'
+                        sh 'terraform apply -var-file=variables/prod.tfvars -auto-approve'
                     }
                 }
             }
