@@ -43,7 +43,7 @@ pipeline{
             steps {
                 script {
                     dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform apply -var-file=variables/prod.tfvars -auto-approve'
+                        sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve'
                     }
                 }
             }
@@ -51,7 +51,7 @@ pipeline{
         stage('Deploying Nginx Application') {
             steps{
                 script{
-                    dir('manifest') {
+                    dir('/var/lib/jenkins/workspace/Build/Project-7/manifest') {
                         sh 'aws eks update-kubeconfig --name my-eks-cluster'
                         sh 'kubectl create namespace eks-nginx-app'
                         sh 'kubectl apply -f deployment.yaml -n eks-nginx-app'
