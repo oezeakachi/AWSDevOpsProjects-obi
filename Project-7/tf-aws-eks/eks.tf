@@ -40,17 +40,22 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0" # IMPORTANT: Changed version from 20.37.1 to a newer one
 
+  # Corrected arguments for module version ~> 21.0
+  # 'cluster_name' and 'cluster_version' are now nested under 'cluster_config' or directly at the top level
+  # 'cluster_endpoint_public_access' is also typically a top-level argument or nested differently.
+  # Based on module v21.x documentation, these are usually top-level.
   cluster_name    = "my-eks-cluster"
   cluster_version = "1.29"
 
-  # Added: Pass the ARN of the explicitly created IAM role for the cluster control plane.
+  # This argument is typically a top-level argument in v21.x
+  cluster_endpoint_public_access  = true
+
+  # Pass the ARN of the explicitly created IAM role for the cluster control plane.
   # This argument is supported in module versions ~> 19.0 and later.
   cluster_role_arn = aws_iam_role.eks_cluster_role.arn
 
-  cluster_endpoint_public_access  = true
-
-  vpc_id                   = module.vpc.vpc_id
-  subnet_ids               = module.vpc.private_subnets
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
 
 
   eks_managed_node_groups = {
