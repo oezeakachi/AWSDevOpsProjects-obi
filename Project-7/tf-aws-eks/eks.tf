@@ -1,61 +1,16 @@
-# 1. Define the EKS Cluster IAM Role
-# This resource explicitly creates the IAM role for the EKS cluster control plane.
-resource "aws_iam_role" "eks_cluster_role" {
-  name = "my-eks-cluster-control-plane-role" # Choose a descriptive name for your cluster role
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "eks.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      },
-    ]
-  })
-
-  tags = {
-    Environment = "dev"
-    Terraform   = "true"
-  }
-}
-
-# 2. Attach the AmazonEKSClusterPolicy to the cluster role
-# This attaches the AWS managed policy that grants necessary permissions for EKS
-# to interact with other AWS services like ELB (for Load Balancers and Target Groups).
-resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attach" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.eks_cluster_role.name
-}
-
-
 # Ref - https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest
-
-# Corrected: Updated module version to one that supports 'cluster_role_arn'
-# Version "~> 19.0" or "~> 21.0" are known to support this.
-# I'm using "~> 21.0" as it's a more recent stable version.
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 21.0" # IMPORTANT: Changed version from 20.37.1 to a newer one
+  version = "20.37.1"
+  #map_users = var.aws_auth_users
 
-  # Corrected arguments for module version ~> 21.0
-  # 'cluster_name' and 'cluster_version' are now nested under 'cluster_config' or directly at the top level
-  # 'cluster_endpoint_public_access' is also typically a top-level argument or nested differently.
-  # Based on module v21.x documentation, these are usually top-level.
   cluster_name    = "my-eks-cluster"
   cluster_version = "1.29"
 
-  # This argument is typically a top-level argument in v21.x
   cluster_endpoint_public_access  = true
 
-  # Pass the ARN of the explicitly created IAM role for the cluster control plane.
-  # This argument is supported in module versions ~> 19.0 and later.
-  cluster_role_arn = aws_iam_role.eks_cluster_role.arn
-
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = module.vpc.private_subnets
 
 
   eks_managed_node_groups = {
