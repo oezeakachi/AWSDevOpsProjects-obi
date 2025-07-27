@@ -5,17 +5,28 @@ pipeline{
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_DEFAULT_REGION = "eu-west-1"
     }
+
+    stage('Clean Terraform Cache'){
+    steps {
+        script {
+            dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){
+                sh 'rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup'
+            }
+        }
+    }
+    }
     stages {
         stage('Checkout SCM') {
             steps { // This is the ONLY 'steps' block for this stage
                 git credentialsId: 'github-pat', branch: 'main', url: 'https://github.com/oezeakachi/AWSDevOpsProjects-obi.git'
             }
         }
+
         stage('Initializing Terraform'){
             steps {
                 script {
                     dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform init -reconfigure'
+                        sh 'terraform init'
                     }
                 }
             }
