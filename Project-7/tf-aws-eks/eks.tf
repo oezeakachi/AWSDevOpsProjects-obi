@@ -35,7 +35,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attach" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.37.1"
+  version = "21.0.4"
   #map_users = var.aws_auth_users
   # Pass the ARN of the newly created IAM role here
   cluster_role_arn = aws_iam_role.eks_cluster_role.arn
