@@ -33,7 +33,7 @@ module "eks" {
   version = "20.37.1"
   #map_users = var.aws_auth_users
   # Pass the ARN of the newly created IAM role here
-  cluster_iam_role_arn = aws_iam_role.eks_cluster_role.arn 
+  cluster_role_arn = aws_iam_role.eks_cluster_role.arn
   cluster_name    = "my-eks-cluster"
   cluster_version = "1.29"
 
