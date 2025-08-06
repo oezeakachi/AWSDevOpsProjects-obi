@@ -2,7 +2,7 @@
 pipeline {
     agent {
         dockerfile {
-            dir '/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'
+            dir '/var/lib/jenkins/workspace/Build/Project-7'
             filename 'Dockerfile'
         }
     }
