@@ -1,5 +1,11 @@
-pipeline{
-    agent any
+
+pipeline {
+    agent {
+        dockerfile {
+            dir '/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'
+            filename 'Dockerfile'
+        }
+    }
     environment {
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
@@ -7,58 +13,66 @@ pipeline{
     }
     stages {
         stage('Checkout SCM') {
-            steps { // This is the ONLY 'steps' block for this stage
+            steps {
                 git credentialsId: 'github-pat', branch: 'main', url: 'https://github.com/oezeakachi/AWSDevOpsProjects-obi.git'
             }
         }
-        stage('Initializing Terraform'){
+        stage('Clean Terraform Cache') {
             steps {
-                script {
-                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform init -reconfigure'
-                    }
+                dir('tf-aws-eks') {
+                    sh 'rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup'
                 }
             }
         }
-        stage('Validating Terraform'){
+        stage('Initializing Terraform') {
             steps {
-                script {
-                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform validate'
-                    }
+                dir('tf-aws-eks') {
+                    sh 'terraform init -reconfigure'
                 }
             }
         }
-        stage('Terraform Plan'){
+        stage('Validating Terraform') {
             steps {
-                script {
-                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform plan -var-file=variables/prod.tfvars'
-                    }
+                dir('tf-aws-eks') {
+                    sh 'terraform validate'
+                }
+            }
+        }
+        stage('Terraform Plan') {
+            steps {
+                dir('tf-aws-eks') {
+                    sh 'echo "--- Listing files in current directory ---"'
+                    sh 'ls -laR'
+                    sh 'echo "--- Running Terraform Plan ---"'
+                    sh 'terraform plan -var-file=variables/prod.tfvars'
                     input(message: "Are you sure to proceed?", ok: "Proceed")
                 }
             }
         }
-        stage('Creating/Destroying EKS Cluster'){
+        stage('Creating/Destroying EKS Cluster') {
             steps {
-                script {
-                    dir('/var/lib/jenkins/workspace/Build/Project-7/tf-aws-eks/'){ // Remember to change this to 'terraform_code' if that's where your files are
-                        sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve'
-                    }
+                dir('tf-aws-eks') {
+                    sh 'terraform $action -var-file=variables/prod.tfvars -auto-approve'
                 }
             }
         }
         stage('Deploying Nginx Application') {
-            steps{
-                script{
-                    dir('/var/lib/jenkins/workspace/Build/Project-7/manifest') {
-                        sh 'aws eks update-kubeconfig --name my-eks-cluster'
-                        sh 'kubectl create namespace eks-nginx-app'
-                        sh 'kubectl apply -f deployment.yaml -n eks-nginx-app'
-                        sh 'kubectl apply -f service.yaml -n eks-nginx-app'
-                    }
+            steps {
+                dir('manifest') {
+                    sh 'aws eks update-kubeconfig --name my-eks-cluster'
+                    sh 'kubectl create namespace eks-nginx-app'
+                    sh 'kubectl apply -f deployment.yaml -n eks-nginx-app'
+                    sh 'kubectl apply -f service.yaml -n eks-nginx-app'
                 }
             }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline finished successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
